@@ -1,5 +1,6 @@
 const { User } = require('../models/user');
 const { Stage } = require('../models/stages');
+const { Benefits } = require('../models/parent_benefits');
 
 
 class UserService {
@@ -124,14 +125,8 @@ class UserService {
 
   }
 
-  async getReferalSlot(parentId) {
+  async getReferalSlot(parentId, next = null) {
     try {
-      // get the ancestor
-      const ancestor = await UserController.getAncestor(parentId);
-
-      // use ancestor to get tree
-      const referalTree = await UserController.getReferalTree(ancestor);
-
         // proceed to compute referal slot
         // check if available slots in parent is complete
         const parentSlots = await UserController.getChildren(parentId);
@@ -140,14 +135,21 @@ class UserService {
           // grant bonus based on stage
           return parentId;
         } else {
+          if (!next) {
+            next = parentSlots[1]
+            parentId = parentSlots[0]
+          } else {
+            parentId = next;
+            next = parentSlots[0]
+          }
+
           // get the position of the parent
           // increase stage of current parent and compute bonus
 
-          // get index of parent
-          const indexOfParentInTree = referalTree.indexOf(parentId);
           // make new parent to be next available slot
           return await UserController.getReferalSlot(
-            referalTree[indexOfParentInTree + 1]
+            parentId,
+            next
           );
         }
     } catch (e) {
@@ -159,10 +161,14 @@ class UserService {
     try {
       const user = await User.query().findById(id);
       const bonus = user.bonus + amount;
-      return await User.query()
+      await User.query()
           .patch({ bonus, stages_id: newStage })
           .where('id', '=', id)
           .returning('*');
+      return await Benefits.query().insert({
+        parent_id: id,
+        amount
+      });
     } catch (e) {
       console.log('oooo', e)
     }
