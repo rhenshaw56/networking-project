@@ -18,8 +18,8 @@ class Benefits extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: 'user.id',
-          to: 'parent_benefits.parent_id'
+          from: 'parent_benefits.parent_id',
+          to: 'user.id'
         }
       }
     }

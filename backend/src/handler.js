@@ -192,7 +192,7 @@ class UserService {
           const slot = await UserController.getReferalSlot(referalId);
           // check stage of all related parents and compute their bonuses
           // referer exist: save the new user with the parent_id as that of the referer's
-          await UserController.updateBonus(slot, 100);
+          await UserController.updateBonus(referalId, 100);
           
           user = await User.query().insert({
             username: userName,

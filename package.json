@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "install": "cd ./backend && npm install",
     "start:backend": "node backend/src/app.js ",
     "migrate": "cd ./backend && npm run migrate",
     "rollback": "cd ./backend && npm run rollback",
