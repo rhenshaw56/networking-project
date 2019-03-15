@@ -1,0 +1,32 @@
+version: '2.1'
+
+services:
+
+  networking-db:
+    container_name: networking-db
+    build: ./db
+    ports:
+      - '5433:5432' # expose ports - HOST:CONTAINER
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: exit 0
+
+  backend:
+    container_name: backend
+    build: ./backend
+    volumes:
+      - './backend:/usr/src/app'
+      - './backend/package.json:/usr/src/package.json'
+    ports:
+      - '8000:8000' # expose ports - HOST:CONTAINER
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/networking_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@users-db:5432/networking_test
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      networking-db:
+        condition: service_healthy
+    links:
+      - networking-db
